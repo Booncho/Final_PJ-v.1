@@ -119,6 +119,8 @@ exports.deleteData = async (req, res) => {
 // Handle data edit
 exports.editData = async (req, res) => {
   try {
+    await connectDB(); // Ensure the database connection is established
+
     const { oldFilename, newFilename } = req.body;
 
     if (!oldFilename || !newFilename) {
