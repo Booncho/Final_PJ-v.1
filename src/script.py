@@ -64,6 +64,7 @@ def train_model(filepath, user_data=None):
 
     user_prediction = None
     if user_data:
+        user_data = [float(val) if val != '?' else np.nan for val in user_data]
         try:
             user_data = [np.nan if val == '?' else float(val) for val in user_data]
             user_data = imputer.transform([user_data])[0]
@@ -90,3 +91,4 @@ if __name__ == '__main__':
     filepath = sys.argv[1]
     user_data = sys.argv[2:] if len(sys.argv) > 2 else None
     train_model(filepath, user_data)
+

@@ -1,32 +1,22 @@
-const mongoose = require("mongoose");
 const fs = require("fs");
 const csv = require("csv-parser");
 const connectDB = require("../config/dbUser");
 const FileData = require("../models/User");
-const moment = require("moment");
-async function findStudentInAllCollections(studentId) {
+
+async function findStudentInFileData(studentId) {
   try {
-    const db = mongoose.connection.db;
-    const collections = await db.listCollections().toArray();
+    const fileData = await FileData.findOne({
+      "data.studentId": studentId,
+    });
 
-    for (const collection of collections) {
-      const modelName = collection.name;
-
-      let StudentModel = mongoose.models[modelName] || 
-        mongoose.model(modelName, new mongoose.Schema({}, { strict: false }), modelName);
-
-      const student = await StudentModel.findOne({ studentId });
-
-      if (student) {
-        console.log(`Student found in collection: ${modelName}`);
-        return student;
-      }
+    if (fileData) {
+      const student = fileData.data.find((item) => item.studentId === studentId);
+      return student || null;
     }
 
-    console.log("Student not found in any collection.");
     return null;
   } catch (err) {
-    console.error("Error searching collections:", err);
+    console.error("Error searching in FileData:", err);
     throw err;
   }
 }
@@ -161,7 +151,6 @@ exports.editData = async (req, res) => {
 };
 
 
-// Display user data
 exports.user = async (req, res) => {
   try {
     let studentId = req.user.emails[0].value.split("@")[0];
@@ -169,7 +158,7 @@ exports.user = async (req, res) => {
       studentId = studentId.slice(0, -1) + "-" + studentId.slice(-1);
     }
 
-    const student = await findStudentInAllCollections(studentId);
+    const student = await findStudentInFileData(studentId);
 
     res.render("item/user/user", {
       user: {
